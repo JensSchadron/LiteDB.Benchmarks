@@ -40,13 +40,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Deletion
         [Benchmark(Baseline = true)]
         public int DeleteAllExpression()
         {
-            return _fileMetaCollection.Delete(_ => true);
-        }
-
-        [Benchmark]
-        public int DeleteAllQuery()
-        {
-            return _fileMetaCollection.Delete(Query.All());
+            return _fileMetaCollection.DeleteMany("1 = 1");
         }
 
         [Benchmark]
