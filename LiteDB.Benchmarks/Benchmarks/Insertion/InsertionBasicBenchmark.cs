@@ -34,12 +34,6 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         }
 
         [Benchmark]
-        public int InsertionBulk()
-        {
-            return _fileMetaCollection.InsertBulk(data, 1000);
-        }
-
-        [Benchmark()]
         public void InsertionWithLoop()
         {
             // ReSharper disable once ForCanBeConvertedToForeach
