@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnassignedField.Global
 
@@ -8,11 +9,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Base
     {
         protected abstract string DatabasePath { get; }
 
-        [ParamsAllValues]
-        public bool IsJournalEnabled;
-
-        [Params(FileMode.Exclusive)]
-        public FileMode FileMode;
+        [Params(ConnectionType.Direct)]
+        public ConnectionType ConnectionType;
 
         [Params(null, "SecurePassword")]
         public string Password;
@@ -20,8 +18,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Base
         private ConnectionString _connectionString;
         protected ConnectionString ConnectionString => _connectionString ??= new ConnectionString(DatabasePath)
         {
-            Journal = IsJournalEnabled,
-            Mode = FileMode,
+            Connection = ConnectionType,
             Password = Password
         };
     }
