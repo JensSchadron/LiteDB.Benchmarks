@@ -21,6 +21,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         [GlobalSetup(Target = nameof(Query_SimpleIndex_Baseline))]
         public void GlobalSetupSimpleIndexBaseline()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);

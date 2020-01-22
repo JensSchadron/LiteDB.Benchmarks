@@ -23,6 +23,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [GlobalSetup(Target = nameof(Insertion))]
         public void GlobalBsonIgnoreSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);

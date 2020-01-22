@@ -19,6 +19,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         [GlobalSetup(Targets = new[] {nameof(FindWithExpression), nameof(FindWithQuery)})]
         public void GlobalSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
 
@@ -28,6 +30,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         [GlobalSetup(Targets = new[] {nameof(FindWithIndexExpression), nameof(FindWithIndexQuery)})]
         public void GlobalIndexSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.IsFavorite);

@@ -19,6 +19,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         [GlobalSetup]
         public void GlobalSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.IsFavorite);

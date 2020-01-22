@@ -23,6 +23,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [GlobalSetup(Target = nameof(InsertionNormal))]
         public void GlobalSetupNormal()
         {
+            File.Delete(DatabasePath);
+
             data = FileMetaGenerator<FileMetaBase>.GenerateList(N); // executed once per each N value
 
             DatabaseInstanceNormal = new LiteDatabase(ConnectionString);

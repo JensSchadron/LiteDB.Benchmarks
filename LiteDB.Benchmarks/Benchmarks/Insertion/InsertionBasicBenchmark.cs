@@ -21,6 +21,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [GlobalSetup]
         public void GlobalSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
 

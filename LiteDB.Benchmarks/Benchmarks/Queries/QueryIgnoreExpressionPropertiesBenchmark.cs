@@ -20,6 +20,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         [GlobalSetup(Target = nameof(DeserializeBaseline))]
         public void GlobalSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);
@@ -30,6 +32,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         [GlobalSetup(Target = nameof(DeserializeWithIgnore))]
         public void GlobalIndexSetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaExclusionCollection = DatabaseInstance.GetCollection<FileMetaWithExclusion>();
             _fileMetaExclusionCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);
