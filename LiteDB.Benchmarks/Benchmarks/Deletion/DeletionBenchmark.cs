@@ -54,10 +54,15 @@ namespace LiteDB.Benchmarks.Benchmarks.Deletion
         {
             const string collectionName = nameof(FileMetaBase);
 
-            var droppedCollectionIndexes = DatabaseInstance.GetCollection(collectionName).GetIndexes().ToList();
+            var indexesCollection = DatabaseInstance.GetCollection("$indexes");
+            var droppedCollectionIndexes = indexesCollection.Query().Where(x => x["collection"] == collectionName && x["name"] != "_id").ToDocuments().ToList();
+
             DatabaseInstance.DropCollection(collectionName);
 
-            foreach (var indexInfo in droppedCollectionIndexes) DatabaseInstance.Engine.EnsureIndex(collectionName, indexInfo.Field, indexInfo.Expression);
+            foreach (var indexInfo in droppedCollectionIndexes)
+            {
+                DatabaseInstance.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
+            }
         }
 
         [GlobalCleanup]

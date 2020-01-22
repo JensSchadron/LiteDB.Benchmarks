@@ -33,6 +33,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [GlobalSetup(Target = nameof(InsertionWithBsonIgnore))]
         public void GlobalIgnorePropertySetup()
         {
+            File.Delete(DatabasePath);
+
             DatabaseInstance = new LiteDatabase(ConnectionString);
             _fileMetaExclusionCollection = DatabaseInstance.GetCollection<FileMetaWithExclusion>();
             _fileMetaExclusionCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);
@@ -55,16 +57,18 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [IterationCleanup]
         public void IterationCleanup()
         {
-            var collectionNames = DatabaseInstance.GetCollectionNames().ToList();
-            foreach (var collectionName in collectionNames)
-            {
-                var droppedCollectionIndexes = DatabaseInstance.GetCollection(collectionName).GetIndexes().ToList();
-                DatabaseInstance.DropCollection(collectionName);
+            var indexesCollection = DatabaseInstance.GetCollection("$indexes");
+            var droppedCollectionIndexes = indexesCollection.Query().Where(x => x["name"] != "_id").ToDocuments().ToList();
 
-                foreach (var indexInfo in droppedCollectionIndexes)
-                {
-                    DatabaseInstance.Engine.EnsureIndex(collectionName, indexInfo.Field, indexInfo.Expression);
-                }
+            var collectionNames = DatabaseInstance.GetCollectionNames();
+            foreach (var name in collectionNames)
+            {
+                DatabaseInstance.DropCollection(name);
+            }
+
+            foreach (var indexInfo in droppedCollectionIndexes)
+            {
+                DatabaseInstance.GetCollection(indexInfo["collection"]).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
         }
 

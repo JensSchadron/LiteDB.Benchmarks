@@ -55,12 +55,14 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         {
             const string collectionName = nameof(FileMetaBase);
 
-            var droppedCollectionIndexes = DatabaseInstanceNormal.GetCollection(collectionName).GetIndexes().ToList();
+            var indexesCollection = DatabaseInstanceNormal.GetCollection("$indexes");
+            var droppedCollectionIndexes = indexesCollection.Query().Where(x => x["collection"] == collectionName && x["name"] != "_id").ToDocuments().ToList();
+
             DatabaseInstanceNormal.DropCollection(collectionName);
 
             foreach (var indexInfo in droppedCollectionIndexes)
             {
-                DatabaseInstanceNormal.Engine.EnsureIndex(collectionName, indexInfo.Field, indexInfo.Expression);
+                DatabaseInstanceNormal.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
         }
 
@@ -69,12 +71,14 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         {
             const string collectionName = nameof(FileMetaBase);
 
-            var droppedCollectionIndexes = DatabaseInstanceInMemory.GetCollection(collectionName).GetIndexes().ToList();
+            var indexesCollection = DatabaseInstanceInMemory.GetCollection("$indexes");
+            var droppedCollectionIndexes = indexesCollection.Query().Where(x => x["collection"] == collectionName && x["name"] != "_id").ToDocuments().ToList();
+
             DatabaseInstanceInMemory.DropCollection(collectionName);
 
             foreach (var indexInfo in droppedCollectionIndexes)
             {
-                DatabaseInstanceInMemory.Engine.EnsureIndex(collectionName, indexInfo.Field, indexInfo.Expression);
+                DatabaseInstanceInMemory.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
         }
 
@@ -85,6 +89,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
 
             DatabaseInstanceNormal.DropCollection(nameof(FileMetaBase));
             DatabaseInstanceNormal.Dispose();
+
+            File.Delete(DatabasePath);
         }
 
         [GlobalCleanup(Target = nameof(InsertionInMemory))]
@@ -94,8 +100,6 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
 
             DatabaseInstanceInMemory.DropCollection(nameof(FileMetaBase));
             DatabaseInstanceInMemory.Dispose();
-
-            File.Delete(DatabasePath);
         }
     }
 }
