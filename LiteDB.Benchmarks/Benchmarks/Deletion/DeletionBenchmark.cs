@@ -35,12 +35,15 @@ namespace LiteDB.Benchmarks.Benchmarks.Deletion
         public void IterationSetup()
         {
             _fileMetaCollection.Insert(data);
+            DatabaseInstance.Checkpoint();
         }
 
         [Benchmark(Baseline = true)]
         public int DeleteAllExpression()
         {
-            return _fileMetaCollection.DeleteMany("1 = 1");
+            var count = _fileMetaCollection.DeleteMany("1 = 1");
+            DatabaseInstance.Checkpoint();
+            return count;
         }
 
         [Benchmark]
@@ -57,6 +60,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Deletion
             {
                 DatabaseInstance.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
+            DatabaseInstance.Checkpoint();
         }
 
         [GlobalCleanup]
@@ -64,6 +68,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Deletion
         {
             // Disposing logic
             DatabaseInstance.DropCollection(nameof(FileMetaBase));
+            DatabaseInstance.Checkpoint();
             DatabaseInstance.Dispose();
 
             File.Delete(DatabasePath);
