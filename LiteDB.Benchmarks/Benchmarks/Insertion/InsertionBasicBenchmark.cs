@@ -28,11 +28,16 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
 
             data = FileMetaGenerator<FileMetaBase>.GenerateList(N); // executed once per each N value
         }
+        
+        [IterationSetup]
+        
 
         [Benchmark(Baseline = true)]
         public int Insertion()
         {
-            return _fileMetaCollection.Insert(data);
+            var count = _fileMetaCollection.Insert(data);
+            DatabaseInstance.Checkpoint();
+            return count;
         }
 
         [Benchmark]
@@ -43,12 +48,15 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             {
                 _fileMetaCollection.Insert(data[i]);
             }
+            DatabaseInstance.Checkpoint();
         }
 
         [Benchmark]
         public int Upsertion()
         {
-            return _fileMetaCollection.Upsert(data);
+            var count = _fileMetaCollection.Upsert(data);
+            DatabaseInstance.Checkpoint();
+            return count;
         }
 
         [Benchmark]
@@ -59,6 +67,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             {
                 _fileMetaCollection.Upsert(data[i]);
             }
+            DatabaseInstance.Checkpoint();
         }
 
         [IterationCleanup]
@@ -66,21 +75,17 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         {
             const string collectionName = nameof(FileMetaBase);
 
-            var indexesCollection = DatabaseInstance.GetCollection("$indexes");
-            var droppedCollectionIndexes = indexesCollection.Query().Where(x => x["collection"] == collectionName && x["name"] != "_id").ToDocuments().ToList();
-
             DatabaseInstance.DropCollection(collectionName);
 
-            foreach (var indexInfo in droppedCollectionIndexes)
-            {
-                DatabaseInstance.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
-            }
+            DatabaseInstance.Checkpoint();
+            DatabaseInstance.Rebuild();
         }
 
         [GlobalCleanup]
         public void GlobalCleanup()
         {
             DatabaseInstance.DropCollection(nameof(FileMetaBase));
+            DatabaseInstance.Checkpoint();
             DatabaseInstance.Dispose();
 
             File.Delete(DatabasePath);

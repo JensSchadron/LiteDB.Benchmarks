@@ -47,13 +47,17 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [Benchmark(Baseline = true)]
         public int Insertion()
         {
-            return _fileMetaCollection.Insert(baseData);
+            var count = _fileMetaCollection.Insert(baseData);
+            DatabaseInstance.Checkpoint();
+            return count;
         }
 
         [Benchmark]
         public int InsertionWithBsonIgnore()
         {
-            return _fileMetaExclusionCollection.Insert(baseDataWithBsonIgnore);
+            var count = _fileMetaExclusionCollection.Insert(baseDataWithBsonIgnore);
+            DatabaseInstance.Checkpoint();
+            return count;
         }
 
         [IterationCleanup]
@@ -72,6 +76,9 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             {
                 DatabaseInstance.GetCollection(indexInfo["collection"]).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
+            
+            DatabaseInstance.Checkpoint();
+            DatabaseInstance.Rebuild();
         }
 
         [GlobalCleanup]
@@ -85,6 +92,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
 
             DatabaseInstance.DropCollection(nameof(FileMetaBase));
             DatabaseInstance.DropCollection(nameof(FileMetaWithExclusion));
+            DatabaseInstance.Checkpoint();
             DatabaseInstance.Dispose();
 
             File.Delete(DatabasePath);

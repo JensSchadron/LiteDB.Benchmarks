@@ -43,13 +43,17 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
         [Benchmark(Baseline = true)]
         public int InsertionNormal()
         {
-            return _fileMetaNormalCollection.Insert(data);
+            var count = _fileMetaNormalCollection.Insert(data);
+            DatabaseInstanceNormal.Checkpoint();
+            return count;
         }
 
         [Benchmark]
         public int InsertionInMemory()
         {
-            return _fileMetaInMemoryCollection.Insert(data);
+            var count = _fileMetaInMemoryCollection.Insert(data);
+            DatabaseInstanceNormal.Checkpoint();
+            return count;
         }
 
         [IterationCleanup(Target = nameof(InsertionNormal))]
@@ -66,6 +70,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             {
                 DatabaseInstanceNormal.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
+            DatabaseInstanceNormal.Checkpoint();
+            DatabaseInstanceNormal.Rebuild();
         }
 
         [IterationCleanup(Target = nameof(InsertionInMemory))]
@@ -82,6 +88,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             {
                 DatabaseInstanceInMemory.GetCollection(collectionName).EnsureIndex(indexInfo["name"], BsonExpression.Create(indexInfo["expression"]), indexInfo["unique"]);
             }
+            DatabaseInstanceInMemory.Checkpoint();
+            DatabaseInstanceInMemory.Rebuild();
         }
 
         [GlobalCleanup(Target = nameof(InsertionNormal))]
@@ -90,6 +98,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             _fileMetaNormalCollection = null;
 
             DatabaseInstanceNormal.DropCollection(nameof(FileMetaBase));
+            DatabaseInstanceNormal.Checkpoint();
             DatabaseInstanceNormal.Dispose();
 
             File.Delete(DatabasePath);
@@ -101,6 +110,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Insertion
             _fileMetaInMemoryCollection = null;
 
             DatabaseInstanceInMemory.DropCollection(nameof(FileMetaBase));
+            DatabaseInstanceInMemory.Checkpoint();
             DatabaseInstanceInMemory.Dispose();
         }
     }
