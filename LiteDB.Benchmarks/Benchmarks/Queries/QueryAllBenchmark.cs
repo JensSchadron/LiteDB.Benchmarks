@@ -25,6 +25,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
             _fileMetaCollection = DatabaseInstance.GetCollection<FileMetaBase>();
 
             _fileMetaCollection.Insert(FileMetaGenerator<FileMetaBase>.GenerateList(N)); // executed once per each N value
+            DatabaseInstance.Checkpoint();
         }
 
         [Benchmark(Baseline = true)]
@@ -50,6 +51,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         {
             // Disposing logic
             DatabaseInstance.DropCollection(nameof(FileMetaBase));
+            DatabaseInstance.Checkpoint();
             DatabaseInstance.Dispose();
 
             File.Delete(DatabasePath);

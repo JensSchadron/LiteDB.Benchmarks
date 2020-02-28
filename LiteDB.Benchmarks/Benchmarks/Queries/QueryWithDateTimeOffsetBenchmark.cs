@@ -32,9 +32,11 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);
 
             _fileMetaCollection.Insert(FileMetaGenerator<FileMetaBase>.GenerateList(N)); // executed once per each N value
+            
+            DatabaseInstance.Checkpoint();
 
             _dateTimeConstraint = DateTime.Now;
-            _dateTimeConstraintBsonValue = new BsonValue(DateTime.Now);
+            _dateTimeConstraintBsonValue = new BsonValue(_dateTimeConstraint);
         }
 
         [Benchmark(Baseline = true)]
@@ -76,6 +78,7 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
         {
             // Disposing logic
             DatabaseInstance.DropCollection(nameof(FileMetaBase));
+            DatabaseInstance.Checkpoint();
             DatabaseInstance.Dispose();
 
             File.Delete(DatabasePath);

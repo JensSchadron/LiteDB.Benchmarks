@@ -27,6 +27,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
             _fileMetaCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);
 
             _fileMetaCollection.Insert(FileMetaGenerator<FileMetaBase>.GenerateList(N)); // executed once per each N value
+            
+            DatabaseInstance.Checkpoint();
         }
 
         [GlobalSetup(Target = nameof(DeserializeWithIgnore))]
@@ -39,6 +41,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
             _fileMetaExclusionCollection.EnsureIndex(fileMeta => fileMeta.ShouldBeShown);
 
             _fileMetaExclusionCollection.Insert(FileMetaGenerator<FileMetaWithExclusion>.GenerateList(N)); // executed once per each N value
+            
+            DatabaseInstance.Checkpoint();
         }
 
         [Benchmark(Baseline = true)]
@@ -62,7 +66,8 @@ namespace LiteDB.Benchmarks.Benchmarks.Queries
 
             DatabaseInstance.DropCollection(nameof(FileMetaWithExclusion));
             _fileMetaExclusionCollection = null;
-
+            
+            DatabaseInstance.Checkpoint();
             DatabaseInstance.Dispose();
 
             File.Delete(DatabasePath);
